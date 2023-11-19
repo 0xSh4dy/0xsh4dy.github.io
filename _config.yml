@@ -65,6 +65,11 @@ index_generator:
   path: ''
   per_page: 10
   order_by: -date
+  
+tag_generator:
+  per_page: 20
+  order_by: -date
+  enable_index_page: true
 
 # Category & Tag
 default_category: uncategorized
