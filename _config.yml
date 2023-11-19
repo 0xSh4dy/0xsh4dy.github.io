@@ -5,7 +5,7 @@
 # Site
 title: sh4dy's blog
 subtitle: "Hey, I'm sh4dy!"
-description: ''
+description: 'Software security and development enthusiast'
 keywords:
 author: sh4dy
 language: en
@@ -63,8 +63,8 @@ prismjs:
 # order_by: Posts order. (Order by date descending by default)
 index_generator:
   path: ''
-  per_page: 10
-  order_by: -date
+  per_page: 1
+  order_by: date
   
 tag_generator:
   per_page: 20
