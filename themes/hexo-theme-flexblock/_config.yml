@@ -7,9 +7,9 @@ menu:
 banner: /images/bg.jpg
 
 author:
-  name: InfoSecIITR
+  name: sh4dy
   avatar: /favicon.png
-  description: The CTF team from IIT Roorkee
+  description: Software development and security enthusiast
 
 toc:
   max_depth: 3 
