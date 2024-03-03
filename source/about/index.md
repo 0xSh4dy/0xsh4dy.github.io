@@ -6,6 +6,6 @@ Hello there! I am `sh4dy`, aka `Rakshit Awasthi`.
 
 Currently, I am a student enrolled in the Bachelor of Technology program at IIT Roorkee. My primary focus lies in the realm of software development and security. 
 
-My interest lies in low-level programming, reverse engineering, AI and kernel security.
+Areas of interest: Low-level programming, reverse engineering, AI and kernel security.
 
 <!-- {% pdf Resume.pdf %} --> 
