@@ -8,6 +8,4 @@ Currently, I am a student enrolled in the Bachelor of Technology program at IIT 
 
 My interest lies in low-level programming, reverse engineering, AI and kernel security.
 
-### My Resume
-
-{% pdf Resume.pdf %}
+<!-- {% pdf Resume.pdf %} --> 
