@@ -72,3 +72,17 @@ social_icon:
   icons:
     github  : https://github.com/InfoSecIITR/
     twitter : https://twitter.com/infoseciitr
+
+highlight:
+  enable: true
+  line_number: true
+  auto_detect: true
+  tab_replace: ''
+  wrap: true
+  hljs: false
+prismjs:
+  enable: true
+  preprocess: true
+  line_number: true
+  tab_replace: ''
+  

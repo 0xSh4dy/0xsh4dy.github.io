@@ -9,7 +9,7 @@ tags: [cloud]
 
 Upon accessing the URL of the provided lambda function in the challenge, we obtain an `aws_access_key_id`, an `aws_secret_access_key`, and an `aws_session_token`. These can serve as temporary credentials, enabling the execution of diverse actions on AWS via the AWS CLI. To preserve these credentials, they can be stored within the `~/.aws/credentials` file, subsequently establishing a default profile for accessing various stuff in the corresponding AWS account.
 
-```
+```bash
 [default]
 aws_access_key_id = ASIA22D7J5LENPGOPGKK
 
@@ -20,7 +20,7 @@ aws_session_token=IQoJb3JpZ2luX2VjEP7//////////wEaDGV1LWNlbnRyYWwtMSJIMEYCIQCpzu
 ```
 Let's get started by fetching details about the IAM entity corresponding to these credentials.
 
-```sh
+```bash
 aws sts get-caller-identity
 ```
 ![](/images/ctfs/nullcon23/cloud02.png)
