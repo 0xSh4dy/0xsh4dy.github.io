@@ -6,10 +6,13 @@ tags: [linux,seccomp,low-level]
 ---
 
 ## Pre-Requisites
-System calls, C, cBPF(classic Berkeley Packet Filter)
+System calls, C
 
 ## Introduction
 The introduction of the `bpf()` system call expanded the utility of BPF beyond its original purpose of packet filtering. With this enhancement, users gained the ability to leverage BPF for tasks such as restricting specific system calls, allowing specific system calls, advanced tracing, etc. One such mechanism of restricting / allowing specific system calls is known as seccomp (secure-computing). In this post, we'll be using BPF for writing a simple seccomp filter that sets a limit on the usage of system calls.
+
+## About seccomp
+Seccomp (Secure Computing Mode) is a feature of the Linux kernel that provides a means for restricting the system calls available to a process. It allows fine-grained control over which system calls a process can make, thereby reducing its attack surface and strengthening the overall security of the system.
 
 ## Instruction classes
 
