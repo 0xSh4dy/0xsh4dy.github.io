@@ -1,7 +1,7 @@
 ---
 title: Seccomp BPF
 readtime: true
-date: 2024-04-05
+date: 2024-04-08
 tags: [linux,seccomp,low-level]
 ---
 
