@@ -164,6 +164,8 @@ To determine if a function is recursive, we need to iterate through all the inst
 ```
 
 ### Depth-First Search on the Control Flow Graph
+For each function, we can grab the first basic block, also known as the entry block, using `F.getEntryBlock()`. Then we call the `Dfs` function mentioned below.
+
 ```cpp
   void Dfs(BasicBlock *currentBlock)
   {
