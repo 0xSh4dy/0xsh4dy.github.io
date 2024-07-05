@@ -53,6 +53,17 @@ To run it, we can generate a `.ll` file containing the LLVM IR and then use `opt
 clang-16 -S -emit-llvm test.c -o test.ll
 opt-16 -load-pass-plugin ./lib.so -passes=run-pass -disable-output test.ll
 ```
+Also, we need to add the `isRequired` function; otherwise, the `run()` function will not get called.
+```cpp
+struct SomePass: public PassInfoMixin<SomePass>{
+  ...
+  static bool isRequired()
+  {
+    return true;
+  }
+}
+```
+
 
 ### Writing a pass for printing global variables and their type
 Here's a simple LLVM pass that prints out all the global variables in a program alongwith their types. The code loops through all the globals, grabs their names and types, and prints them out. 
