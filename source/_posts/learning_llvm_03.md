@@ -380,7 +380,7 @@ Now let's load the binary in gdb and view the JIT'd code.
 
 ![](/images/llvm_learning/llvm_learning_05.png)
 
-In the image above, we can see the `call r12` instruction which calls the JIT'd code. Setting a breakpoint on this instruction, running the process, and by dumping instructions from the location stored in r12, we can see the following code:
+In the image above, we can see the `call r12` instruction which calls the JIT'd code. Setting a breakpoint on this instruction, running the process, and by dumping instructions from the memory address stored in r12, we can see the following code:
 
 ![](/images/llvm_learning/llvm_learning_06.png)
 ![](/images/llvm_learning/llvm_learning_07.png)
