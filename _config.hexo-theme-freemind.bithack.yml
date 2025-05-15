@@ -1,0 +1,102 @@
+slogan: "Arigato gozaimasu for visiting!"
+
+show_heart: true
+
+show_slogan: true
+
+menu:
+  - title: Blogs
+    url: archives
+    intro: "All the articles."
+    # icon: "fa fa-archive"
+  # - title: Categories
+  #   url: categories
+  #   intro: "All the categories."
+    # icon: "fa fa-folder"
+  # - title: Tags
+  #   url: tags
+  #   intro: "All the tags."
+    # icon: "fa fa-tags"
+  # - title: About
+  #   url: about
+  #   intro: "About me."
+    # icon: "fa fa-user"
+  # - title: RSS
+  #   url: atom.xml
+  #   intro: "Subscribe me."
+    # icon: "fa fa-user"
+
+links:
+  - title: "My GitHub"
+    url: https://github.com/0xSh4dy
+    intro: "My GitHub Account"
+    icon: "fa fa-github"
+
+  - title: "My LinkedIn"
+    url: https://www.linkedin.com/in/rakshit-awasthi-114ba91b9
+    intro: "My Linkedin account."
+    icon: "fa fa-linkedin"
+  
+  - title: "My Twitter"
+    url: https://x.com/sh4dy_0011
+    intro: "My Twitter account."
+    icon: "fa fa-twitter"
+  
+  - title: "My Email"
+    url: "mailto:rakshitawasthi14@gmail.com"
+    intro: "My email."
+    icon: "fa fa-envelope"
+    
+widgets:
+- search
+- category
+- tagcloud
+- recent_posts
+- links
+
+rss: atom.xml
+fancybox: true
+favicon: favicon.png
+#duoshuo_shortname: 
+
+
+# Analytics
+google_analytics:
+  enable: true
+  siteid: UA-70812759-1
+
+
+# search
+#swiftype_key: ZP2ZSuHgipSZfRyU8uTR
+
+#valine
+valine: 
+  enable: false
+  appId: 'xxx'
+  appKey: 'xxx'
+  placeholder: ""
+  visitor: false
+  avatar: 'monsterid'
+  requiredFields: ['nick','mail']
+  pageView: false
+  
+#waline
+waline:
+  enable: false
+  serverURL: ''
+  pageview: false
+  lang: en
+  dark: true
+  requiredMeta: ['nick', 'mail']
+  locale:
+    placeholder: 'Comment with Email address will get notification when replied'
+
+gitalk:
+  enable: false
+  clientID: ''
+  clientSecret: ''
+  repo: ''
+  owner: ''
+  admin: ['']
+  id: location.pathname
+  distractionFreeMode: true
