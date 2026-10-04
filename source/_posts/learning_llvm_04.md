@@ -12,8 +12,6 @@ In the previous blogs we got a brief intro to LLVM IR and the associated concept
 MIR a human-readable serialization format used in the LLVM compiler infrastructure to represent machine-specific intermediate representation, with YAML being used as the data serialization format. The first yaml document can contain an LLVM IR module and the remaining documents contain machine functions.
 Please note that unlike LLVM IR, MIR doesn't have the concept of modules. A `MachineModuleInfo` class exists but it's more like a tracker rather than the parent container. A `Module` in the LLVM IR acts as a container and stores data like the list of functions, globals, named metadata,etc. However, `MachineModuleInfo` acts as a tracker, storing a pointer to the corresponding LLVM IR module, and a mapping between LLVM IR functions and Machine functions.
 
-Please note that the LLVM version used for adding references to source code in this blog is LLVM 22.1.8.
-
 ```cpp
 // llvm/CodeGen/MachineModuleInfo.h
 class MachineModuleInfo {
@@ -23,9 +21,10 @@ class MachineModuleInfo {
   // ...
   DenseMap<const Function*, std::unique_ptr<MachineFunction>> MachineFunctions;
 ```
+Please note that the LLVM version used for adding references to source code in this blog is LLVM 22.1.8.
 
 ## Loading an MIR file
-Now let's try to load an MIR file. Since there's nothing like `MachineModule`, parsing an MIR file also gives an `llvm::Module` object.
+Now let's try to load an MIR file. Since there's nothing like `MachineModule`, parsing an MIR file gives an `llvm::Module` object.
 
 ```cpp
 // lib/CodeGen/MIRParser/MIRParser.cpp
@@ -34,7 +33,7 @@ MIRParser::parseIRModule(DataLayoutCallbackTy DataLayoutCallback) {
   return Impl->parseIRModule(DataLayoutCallback);
 }
 ```
-This function creates a new `llvm::Module` object. In case the yaml file didn't have any LLVM IR at the first document, an empty `llvm::Module` is created.
+This function creates a new `llvm::Module` object. In case the yaml file didn't have any LLVM IR at the first document, an empty module is created.
 
 ```cpp
 // CodeGen/MIRParser/MIRParser.cpp
@@ -70,7 +69,7 @@ MIRParserImpl::parseIRModule(DataLayoutCallbackTy DataLayoutCallback) {
 Recall the definition of a basic block, "a basic block is a straight-line sequence of instructions with no branches, meaning that execution starts at a single entry point and proceeds sequentially to a single exit point, where it then continues to the next basic block. Basic blocks belong to functions and cannot have jumps into their middle, ensuring that once execution starts, it will proceed through all instructions in the block. A basic block must have exactly one terminator instruction. This instruction tells the possible destinations of this basic block."
 
 A `MachineBasicBlock` is similar but:
-- Unlike a basic block, a Machine Basic Block can have multiple terminator instructions. Let's seee some code-snippets from the LLVM source code to prove that.
+- Unlike a basic block, a Machine Basic Block can have multiple terminator instructions. Let's see some code-snippets from the LLVM source code to prove that.
 
 ```cpp
 // llvm/IR/BasicBlock.h
@@ -81,11 +80,12 @@ const Instruction *getTerminator() const LLVM_READONLY {
 }
 ```
 ```cpp
-// lib/CodeGen/MachineBasicBlock.cpp
+// llvm/CodeGen/MachineBasicBlock.h
 inline iterator_range<iterator> terminators() {
     return make_range(getFirstTerminator(), end());
 }
 
+// lib/CodeGen/MachineBasicBlock.cpp
 MachineBasicBlock::iterator MachineBasicBlock::getFirstTerminator() {
   iterator B = begin(), E = end(), I = E;
   while (I != B && ((--I)->isTerminator() || I->isDebugInstr()))
@@ -98,7 +98,7 @@ MachineBasicBlock::iterator MachineBasicBlock::getFirstTerminator() {
 - This shows that a `MachineBasicBlock` can have multiple terminator instructions.
 
 ## Loading an MIR file
-We can use the tool [LLVM-Lens](https://github.com/manasghandat/LLVM-Lens) to directly retrieve the MIR for a given C/C++ file. Let's create a file test.c
+We can use the tool [LLVM-Lens](https://github.com/manasghandat/LLVM-Lens) to directly retrieve the MIR at a particular stage for a given C/C++ file. Let's create a file test.c
 
 ```c
 // test.c
@@ -165,9 +165,12 @@ int main(int argc, char **argv) {
 ```
 
 ## Target, TargetRegistry and TargetMachine 
-Now that we have the `Module`, we need to find a way to run a Machine Function pass. Note that a `Module` doesn't store any `MachineFunction` objects so we can't directly use it to run a Machine Function pass. What we need to do is to first create a `MachineModuleInfo` object and populate the required information into it. Earlier we saw that this class stores a mapping between `Function`s and `MachineFunction`s. Before creating a `MachineModuleInfo` object, we need to create a `TargetMachine`, because creating a `MachineModuleInfo` object without supplying a valid pointer to `TargetMachine` will crash the program.
+Now that we have the `Module`, we need to find a way to run a Machine Function pass. Note that a `Module` doesn't store any `MachineFunction` objects so we can't directly use it to run a Machine Function pass. What we need to do is to first create a `MachineModuleInfo` object and populate the required information into it. Earlier we saw that this class stores a mapping between `Function`s and `MachineFunction`s. Before creating a `MachineModuleInfo` object, we need to create a `TargetMachine`, because creating a `MachineModuleInfo` object without supplying a valid pointer to `TargetMachine` will crash the program because the constructor dereferences the ptr to `TargetMachine`, and it's default initialized to nullptr.
 
 ```cpp
+// llvm/CodeGen/MachineModuleInfo.h
+LLVM_ABI explicit MachineModuleInfo(const TargetMachine *TM = nullptr);
+
 // lib/CodeGen/MachineModuleInfo.cpp
 MachineModuleInfo::MachineModuleInfo(const TargetMachine *TM)
     : TM(*TM), Context(TM->getTargetTriple(), TM->getMCAsmInfo(),
@@ -226,18 +229,17 @@ std::string target_error;
 const llvm::Target *target =
     llvm::TargetRegistry::lookupTarget(triple, target_error);
 if (!target) {
-  llvm::errs() << "learning_llvm: " << target_error << "\n";
-  return 1;
+    llvm::errs() << "learning_llvm: " << target_error << "\n";
+    return 1;
 }
 
-auto TM = target->createTargetMachine(triple, "", "", llvm::TargetOptions(),
-                                      std::nullopt);
+llvm::TargetMachine *TM = target->createTargetMachine(
+    triple, "", "", llvm::TargetOptions(), std::nullopt);
 if (!TM) {
-  llvm::errs() << "learning_llvm: could not create a target machine for "
-                << triple.getTriple() << "\n";
-  return 1;
+    llvm::errs() << "learning_llvm: could not create a target machine for "
+                    << triple.getTriple() << "\n";
+    return 1;
 }
-
 ```
 
 ## Providing required information to MachineModuleInfo
@@ -392,7 +394,7 @@ Now let's extract the `MachineFunction`s from the MMI, register and run the pass
 Notice the line `MFAM.registerPass([&]{return llvm::PassInstrumentationAnalysis();});`. We cannot just ignore this otherwise the program will crash.
 `MachineFunctionPassManager` is just an alias for `PassManager<MachineFunction>`, and `run` pulls `PassInstrumentationAnalysis` out of the analysis manager before it runs anything.
 ```cpp
-// lib/CodeGen/MachinePassManager.cpp (LLVM 22.1.8, line 145)
+// lib/CodeGen/MachinePassManager.cpp
 template <>
 PreservedAnalyses
 PassManager<MachineFunction>::run(MachineFunction &MF,
@@ -436,7 +438,7 @@ MFAM.registerPass([&]{return llvm::PassInstrumentationAnalysis();});
 ```
 Now that we are familiar with all the concepts involved, let's compile and run the program.
 
-![](/images/llvm_learning/blog4_2.png)
+![](/images/llvm_learning/blog4_3.png)
 
 We can see that the pass printed all the `MachineFunction`s present in the original MIR file. Complete code for this:
 ```cpp
@@ -528,7 +530,6 @@ int main(int argc, char **argv) {
 ## References
 
 https://llvm.org/docs/MIRLangRef.html
-<br>
 https://github.com/llvm/llvm-project
 
 
