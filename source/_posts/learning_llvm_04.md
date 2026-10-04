@@ -23,7 +23,41 @@ class MachineModuleInfo {
 ```
 Please note that the LLVM version used for adding references to source code in this blog is LLVM 22.1.8.
 
-## Loading an MIR file
+
+## Machine Basic Block
+Recall the definition of a basic block, "a basic block is a straight-line sequence of instructions with no branches, meaning that execution starts at a single entry point and proceeds sequentially to a single exit point, where it then continues to the next basic block. Basic blocks belong to functions and cannot have jumps into their middle, ensuring that once execution starts, it will proceed through all instructions in the block. A basic block must have exactly one terminator instruction. This instruction tells the possible destinations of this basic block."
+
+A `MachineBasicBlock` is similar but:
+- Unlike a basic block, a Machine Basic Block can have multiple terminator instructions. Let's see some code-snippets from the LLVM source code to prove that.
+
+```cpp
+// llvm/IR/BasicBlock.h
+const Instruction *getTerminator() const LLVM_READONLY {
+    if (InstList.empty() || !InstList.back().isTerminator())
+        return nullptr;
+    return &InstList.back();
+}
+```
+```cpp
+// llvm/CodeGen/MachineBasicBlock.h
+inline iterator_range<iterator> terminators() {
+    return make_range(getFirstTerminator(), end());
+}
+
+// lib/CodeGen/MachineBasicBlock.cpp
+MachineBasicBlock::iterator MachineBasicBlock::getFirstTerminator() {
+  iterator B = begin(), E = end(), I = E;
+  while (I != B && ((--I)->isTerminator() || I->isDebugInstr()))
+    ; /*noop */
+  while (I != E && !I->isTerminator())
+    ++I;
+  return I;
+}
+```
+
+This shows that a `MachineBasicBlock` can have multiple terminator instructions.
+
+## The MIR Parser
 Now let's try to load an MIR file. Since there's nothing like `MachineModule`, parsing an MIR file gives an `llvm::Module` object.
 
 ```cpp
@@ -64,39 +98,6 @@ MIRParserImpl::parseIRModule(DataLayoutCallbackTy DataLayoutCallback) {
   return M;
 }
 ```
-
-## Machine Basic Block
-Recall the definition of a basic block, "a basic block is a straight-line sequence of instructions with no branches, meaning that execution starts at a single entry point and proceeds sequentially to a single exit point, where it then continues to the next basic block. Basic blocks belong to functions and cannot have jumps into their middle, ensuring that once execution starts, it will proceed through all instructions in the block. A basic block must have exactly one terminator instruction. This instruction tells the possible destinations of this basic block."
-
-A `MachineBasicBlock` is similar but:
-- Unlike a basic block, a Machine Basic Block can have multiple terminator instructions. Let's see some code-snippets from the LLVM source code to prove that.
-
-```cpp
-// llvm/IR/BasicBlock.h
-const Instruction *getTerminator() const LLVM_READONLY {
-    if (InstList.empty() || !InstList.back().isTerminator())
-        return nullptr;
-    return &InstList.back();
-}
-```
-```cpp
-// llvm/CodeGen/MachineBasicBlock.h
-inline iterator_range<iterator> terminators() {
-    return make_range(getFirstTerminator(), end());
-}
-
-// lib/CodeGen/MachineBasicBlock.cpp
-MachineBasicBlock::iterator MachineBasicBlock::getFirstTerminator() {
-  iterator B = begin(), E = end(), I = E;
-  while (I != B && ((--I)->isTerminator() || I->isDebugInstr()))
-    ; /*noop */
-  while (I != E && !I->isTerminator())
-    ++I;
-  return I;
-}
-```
-- This shows that a `MachineBasicBlock` can have multiple terminator instructions.
-
 ## Loading an MIR file
 We can use the tool [LLVM-Lens](https://github.com/manasghandat/LLVM-Lens) to directly retrieve the MIR at a particular stage for a given C/C++ file. Let's create a file test.c
 
